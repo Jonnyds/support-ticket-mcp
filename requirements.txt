@@ -1,0 +1,6 @@
+mcp[cli]>=1.27
+duckdb>=1.1
+pandas>=2.0
+numpy>=1.26
+openai>=1.40
+python-dotenv>=1.0

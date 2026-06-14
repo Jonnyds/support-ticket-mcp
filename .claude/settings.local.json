@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__support-tickets__get_schema",
+      "mcp__support-tickets__query_tickets",
+      "mcp__support-tickets__search_tickets"
+    ]
+  }
+}
