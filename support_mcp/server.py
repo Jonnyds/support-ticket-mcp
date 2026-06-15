@@ -32,26 +32,35 @@ mcp = FastMCP("support-tickets")
 
 @mcp.tool()
 def get_schema() -> str:
-    """Schema: columns, types, sample values, and notes. Call this first so you
-    can write correct SQL (e.g. exact priority/queue spellings)."""
+    """Return the tickets table schema, column types, sample values, and notes.
+    Call this before writing SQL so you can use the correct column names and
+    exact categorical values, such as priority, queue, type, language, and tags."""
     log.info("get_schema called")
     return json.dumps(db.schema_description(), indent=2, default=str)
 
 
 @mcp.tool()
 def query_tickets(sql: str) -> str:
-    """Run a read-only SELECT on the 'tickets' table for counts, group-bys and
-    filters (per queue, priority, type, language, tags). DuckDB SQL; SELECT/WITH
-    only; capped at 500 rows. Call get_schema first for exact values."""
+    """Run a safe read-only DuckDB SQL query on the 'tickets' table.
+    Use this for exact structured questions: counts, filters, group-bys,
+    comparisons, and aggregations by queue, priority, type, language, or tags.
+    Only SELECT/WITH statements are allowed. Results are capped at 500 rows.
+    Call get_schema first to confirm column names and exact field values.
+    Do not use this for natural-language ticket content, use search_tickets
+    instead.
+    """
     log.info("query_tickets: %s", sql.replace("\n", " ")[:200])
     return json.dumps(db.run_sql(sql), indent=2, default=str)
 
 
 @mcp.tool()
 def search_tickets(query: str, k: int = 5) -> str:
-    """Semantic search over subject+body for theme questions (e.g. "billing
-    complaints", "login problems"). Returns the top-k similar tickets. Use
-    query_tickets for exact counts. Needs OPENAI_API_KEY."""
+    """Run semantic search over ticket subject and body text.
+    Use this for natural-language content questions such as billing complaints,
+    login problems, refund issues, angry customers, or similar wording.
+    Returns the top-k most similar tickets, with similarity scores and ticket
+    fields. Use query_tickets for exact counts, filters, and aggregations.
+    """
     try:
         log.info("search_tickets: %r (k=%s)", query[:100], k)
         return json.dumps(search.search(query, k), indent=2, default=str)

@@ -12,7 +12,7 @@ from . import search  # noqa: E402
 
 def main() -> None:
     print("Building embedding index (one-time, cached afterwards)...")
-    print("Embedding ticket text via OpenAI — this can take a minute on first run.")
+    print("Embedding ticket text via OpenAI - this can take a minute on first run.")
     start = time.perf_counter()
     try:
         search._ensure_index()

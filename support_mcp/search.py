@@ -60,7 +60,8 @@ def _cache_key(texts: list[str]) -> str:
     the key changes so a fresh cache is built instead of loading stale vectors."""
     h = hashlib.sha256(EMBED_MODEL.encode())
     h.update(str(len(texts)).encode())
-    h.update("".join(texts[:50]).encode())
+    for text in texts:
+        h.update(text.encode())
     return h.hexdigest()[:16]
 
 
@@ -142,6 +143,6 @@ def search(query: str, k: int = 5) -> dict:
 
     if not results:
         return {"query": query, "results": [],
-                "note": "No tickets matched closely enough; the question may be "
+                "note": "No tickets matched closely enough, the question may be "
                         "out of scope for this dataset."}
     return {"query": query, "results": results}

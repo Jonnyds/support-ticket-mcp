@@ -2,7 +2,7 @@
 
 An MCP server that lets you ask natural-language questions about the
 [Tobi-Bueck/customer-support-tickets](https://huggingface.co/datasets/Tobi-Bueck/customer-support-tickets)
-dataset (bilingual EN/DE support tickets) and get accurate answers —
+dataset (bilingual EN/DE support tickets) and get accurate answers -
 through **Claude Code** or **Codex**, locally.
 
 ## How it works (thin server, host does the reasoning)
@@ -15,12 +15,12 @@ tags) and **free text** (subject, body, answer). Those need different tools:
 | Counts / aggregates | "How many tickets per queue?" | `query_tickets` (SQL → DuckDB) |
 | Group-bys / breakdowns | "Breakdown by priority and language?" | `query_tickets` |
 | Most common tags | "What are the top ticket tags?" | `query_tickets` (UNION tag_1..tag_8) |
-| Themes / paraphrase | "What are customers saying about billing?" | `search_tickets` (embeddings) |
+| Free-text / paraphrase | "What are customers saying about billing?" | `search_tickets` (embeddings) |
 | See the data shape | (first call, always) | `get_schema` |
 
 The MCP **host** (Claude Code / Codex) is the chat interface *and* the LLM. It
 reads the schema, writes the SQL itself, and picks which tool to call. This
-server stays a thin, safe data layer — so the SQL tools need **no API key**.
+server stays a thin, safe data layer - so the SQL tools need **no API key**.
 
 ```
 You ─▶ Claude Code (writes SQL, routes) ─stdio─▶ this server ─▶ DuckDB + vector index
@@ -28,9 +28,9 @@ You ─▶ Claude Code (writes SQL, routes) ─stdio─▶ this server ─▶ Du
 
 ## Tools
 
-- **`get_schema()`** — columns, types, sample values for categoricals, null counts, usage notes. Call first.
-- **`query_tickets(sql)`** — runs a read-only `SELECT` on the `tickets` table (columns: subject, body, answer, type, queue, priority, language, version, tag_1..tag_8, tags_all). Guards: single statement, SELECT/WITH only, no DDL/DML, SQL results capped at 500 rows, errors returned to the model for self-correction.
-- **`search_tickets(query, k=5)`** — semantic search over subject+body via OpenAI embeddings (EN/DE). Returns up to `k` results (capped at 20), filtered by a relevance floor so off-topic queries return nothing. **Needs `OPENAI_API_KEY`.**
+- **`get_schema()`** - columns, types, sample values for categoricals, null counts, usage notes. Call first.
+- **`query_tickets(sql)`** - runs a read-only `SELECT` on the `tickets` table (columns: subject, body, answer, type, queue, priority, language, version, tag_1..tag_8, tags_all). Guards: single statement, SELECT/WITH only, no DDL/DML, SQL results capped at 500 rows, errors returned to the model for self-correction.
+- **`search_tickets(query, k=5)`** - semantic search over subject+body via OpenAI embeddings (EN/DE). Returns up to `k` results (capped at 20), filtered by a similarity threshold so off-topic queries return nothing. **Needs `OPENAI_API_KEY`.**
 
 ## Requirements
 
@@ -55,10 +55,10 @@ pip install -r requirements.txt
 python download_data.py
 
 # 2) Only needed for semantic search: add your OpenAI key
-cp .env.example .env        # Windows: copy .env.example .env  — then edit it
+cp .env.example .env        # Windows: copy .env.example .env  - then edit it
 
 # 3) (recommended) prebuild the embedding index so the first search is instant
-#    — otherwise it builds lazily on the first search_tickets call:
+#    - otherwise it builds lazily on the first search_tickets call:
 python -m support_mcp.build_index
 ```
 
@@ -68,7 +68,7 @@ python -m support_mcp.build_index
 |---|---|---|
 | `OPENAI_API_KEY` | only for `search_tickets` | embeddings for semantic search |
 | `OPENAI_EMBED_MODEL` | no | embedding model, defaults to `text-embedding-3-small` |
-| `SEARCH_MIN_SIMILARITY` | no | relevance floor for search (0–1), defaults to `0.30` |
+| `SEARCH_MIN_SIMILARITY` | no | similarity threshold for search (0–1), defaults to `0.30` |
 | `TICKETS_CSV` | no | point the server at a custom CSV path |
 
 (The download source is set in `download_data.py`; override it with a
@@ -89,7 +89,7 @@ npx @modelcontextprotocol/inspector python support_mcp/server.py
 
 ## Connect to Claude Code
 
-From the project directory, register the server (this is the form that works —
+From the project directory, register the server (this is the form that works -
 note the `--` before the command):
 
 ```bash
@@ -103,7 +103,7 @@ claude
 ```
 
 If the server can't find its packages, your virtualenv may not be active when
-Claude Code launches it — point the command at the venv's Python directly, e.g.
+Claude Code launches it - point the command at the venv's Python directly, e.g.
 `.../.venv/bin/python support_mcp/server.py` (or `...\.venv\Scripts\python.exe` on Windows).
 
 ## Connect to Codex
@@ -127,12 +127,12 @@ env = { OPENAI_API_KEY = "sk-..." }
 - "Show the split between English and German tickets."
 - "What are the 10 most common tags?"
 - "How many tickets are type Incident with high priority?"
-- "Find tickets about login or VPN problems." *(uses search_tickets)*
+- "Find tickets about software crashing or freezing." *(uses search_tickets)*
 
 ## Notes / data quirks handled on load
 
 - `priority` is normalized to lowercase (`low`/`medium`/`high`) for predictable filters.
-- The dataset is **bilingual (en/de)** — `language` lets you filter or split by it.
+- The dataset is **bilingual (en/de)** - `language` lets you filter or split by it.
 - `body` = the customer's message text, `answer` = the reply/response to the ticket.
 - Tags span `tag_1..tag_8` (often NULL); a `tags_all` column joins them for easy `LIKE` filters.
 

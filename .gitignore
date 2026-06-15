@@ -5,3 +5,5 @@ __pycache__/
 data/tickets.csv
 data/.cache/
 data/query_audit.log
+
+.claude/

@@ -138,7 +138,7 @@ def schema_description() -> dict:
             ).fetchall()
             # DuckDB returns 1-col rows as tuples, e.g. [("high",)]; unwrap to ["high"]
             entry["sample_values"] = [v[0] for v in vals]
-        # how many cells are empty — signals column completeness (e.g. tags mostly NULL)
+        # how many cells are empty - signals column completeness (e.g. tags mostly NULL)
         null_ct = con.execute(
             f'SELECT COUNT(*) FROM {TABLE} WHERE "{name}" IS NULL'
         ).fetchone()[0]
@@ -159,13 +159,13 @@ def schema_description() -> dict:
         "tag_columns": tag_cols,
         "notes": [
             "priority values are lowercase: 'low', 'medium', 'high'.",
-            "language is 'en' or 'de' — the dataset is bilingual (English/German).",
+            "language is 'en' or 'de' - the dataset is bilingual (English/German).",
             "'body' is the customer's message; 'answer' is the reply/response to "
             "the ticket; both are long free text. Use search_tickets (not SQL LIKE) "
-            "for theme questions over them.",
+            "for natural-language questions over them.",
             "type is one of: Incident, Request, Problem, Change.",
             "queue is the routing department (e.g. 'Technical Support', "
-            "'Billing and Payments') — see sample_values.",
+            "'Billing and Payments') - see sample_values.",
             "Tags are spread across tag_1..tag_N (many NULL). To count the most "
             "common tags, UNION the tag columns, e.g.: "
             f"SELECT tag, COUNT(*) c FROM ({tag_union}) GROUP BY tag ORDER BY c DESC. "
